@@ -13,4 +13,3 @@
     require 'includes/migrate.inc.php';
 
     new Brightfish\Turtle\Migrate($argv);
-?>
