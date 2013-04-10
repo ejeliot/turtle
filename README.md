@@ -102,6 +102,6 @@ Restructuring and improvements to command line parameters and usage:
 * Fix minor issue with undefined variable $filename in method 'mark' (now '_mark').
 * Added annotations.
 
- ### 0.0.1
+### 0.0.1
 
- Initial release
+Initial release
