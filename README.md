@@ -47,7 +47,7 @@ This example will create
 
 001.a-test-name.sql
 
-### Show New (Unapplied) Migrations
+### Show New (unapplied) Migrations
 
     ./migrate.php --config=[clocation of config file] --action=show_new
 
@@ -69,7 +69,7 @@ Mark all migrations as applied (without actually applying them)
 
     ./migrate.php --config=[location of config file] --action=mark --filename=[filename excluding path]
 
-### Apply New (Unapplied) Migrations
+### Apply New (unapplied) Migrations
 
     ./migrate.php --config=[location of config file] --action=apply_new
 
