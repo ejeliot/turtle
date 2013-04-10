@@ -84,16 +84,16 @@ Mark all migrations as applied (without actually applying them)
 Restructuring and improvements to command line parameters and usage:
 
 * Command line parameters changed:
-  - Commands are entered without prefix.
-  - Options can be set with -- prefix.
-  - Config file can be set using three ways:
-    1. Using default config file: turtle.conf.
-    2. Using environment variable TURTLE_CONFIG.
-    3. Using command line parameter --config=<filename>.
+   - Commands are entered without prefix.
+   - Options can be set with -- prefix.
+   - Config file can be set using three ways:
+      1. Using default config file: turtle.conf.
+      2. Using environment variable TURTLE_CONFIG.
+      3. Using command line parameter --config=<filename>.
 * Use of internal mysqli method to run SQL migration instead of standalone mysql executable.
 * Display failed query in multi query migrations.
 * Extracted methods for messaging: 'error', 'success', 'message', and 'abort'.
-* Always trying to use COMMIT/ROLLBACK. Ignored with MyISAM, but works with InnoDB.
+* Always use COMMIT/ROLLBACK. Ignored with MyISAM, but works with InnoDB.
 * Implemented functional dry run support.
 * Added help message.
 * Added automatic timestamping to migrations table scheme.
