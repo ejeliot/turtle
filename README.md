@@ -8,7 +8,7 @@ Copyright (c) Brightfish Software (author, Ed Eliot)
 
 ## License
 
-BSB License - see license file
+BSD License - see license file
 
 ## Config Format
 
