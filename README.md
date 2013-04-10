@@ -4,7 +4,7 @@ A simple script for managing mysql database schema via raw SQL migration files.
 
 ## Author/Copyright
 
-Copyright (c) Brightfish Software (author, Ed Eliot)
+Copyright (c) Brightfish Software Limited (author, Ed Eliot)
 
 ## License
 
