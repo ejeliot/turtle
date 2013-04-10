@@ -17,7 +17,7 @@ BSD License - see license file
 Turtle gets settings from a config file. The config file uses the ini file format and can be supplied in one of 3 ways:
 
 1. Modifying the default (turtle.conf) that is supplied with the distribution.
-2. Setting the config path in an environment variable called TURTLE_CONFIG.
+2. Setting the config path in an environment variable called `TURTLE_CONFIG`.
 3. Specifying as a command line parameter `--config=<path to config file>`.
 
 ```ini
@@ -81,27 +81,26 @@ Mark all migrations as applied (without actually applying them)
 
 ### 0.0.2
 
-Restructuring and improvements to command line parameters and usage
+Restructuring and improvements to command line parameters and usage:
 
-* Changes:
-  - Command line parameters changed:
-    + Commands are entered without prefix.
-    + Options can be set with -- prefix.
+* Command line parameters changed:
+  - Commands are entered without prefix.
+  - Options can be set with -- prefix.
   - Config file can be set using three ways:
     1. Using default config file: turtle.conf.
     2. Using environment variable TURTLE_CONFIG.
     3. Using command line parameter --config=<filename>.
-  - Use of internal mysqli method to run SQL migration instead of standalone mysql executable.
-  - Display failed query in multi query migrations.
-  - Extracted methods for messaging: 'error', 'success', 'message', and 'abort'.
-  - Always trying to use COMMIT/ROLLBACK. Ignored with MyISAM, but works with InnoDB.
-  - Implemented functional dry run support.
-  - Added help message.
-  - Added automatic timestamping to migrations table scheme.
-  - Added storing of applied migration(s) to migration table.
-  - Fix minor issue with method name: 'get_full_path' instead of 'get_full_filename'.
-  - Fix minor issue with undefined variable $filename in method 'mark' (now '_mark').
-  - Added annotations.
+* Use of internal mysqli method to run SQL migration instead of standalone mysql executable.
+* Display failed query in multi query migrations.
+* Extracted methods for messaging: 'error', 'success', 'message', and 'abort'.
+* Always trying to use COMMIT/ROLLBACK. Ignored with MyISAM, but works with InnoDB.
+* Implemented functional dry run support.
+* Added help message.
+* Added automatic timestamping to migrations table scheme.
+* Added storing of applied migration(s) to migration table.
+* Fix minor issue with method name: 'get_full_path' instead of 'get_full_filename'.
+* Fix minor issue with undefined variable $filename in method 'mark' (now '_mark').
+* Added annotations.
 
  ### 0.0.1
 
