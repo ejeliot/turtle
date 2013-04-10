@@ -2,91 +2,101 @@
     namespace Brightfish\Turtle;
 
     class Migrate {
-        protected $options;
+        // Options
+        protected $options = array(
+            'config' => 'turtle.conf', // default config file
+        );
         protected $config;
-        protected $migrations;
+        protected $migrations = array();
         protected $migrationsMax;
+        /** @var \mysqli */
         protected $db;
+        /** @var \Brightfish\Turtle\Console */
         protected $console;
 
-        public function __construct() {
+        public function __construct($argv) {
             $this->console = new Console();
-            $this->options = getopt('', array(
-                'config:',
-                'action:',
-                'dryrun',
-                'name::',
-                'filename::'
-            ));
-
-            if (empty($this->options['config']) || empty($this->options['action'])) {
-                die($this->console->format(
-                    'Usage: ./migrate.php --config=[location of config file] --action=[action to run]',
-                    'red'
-                ));
-            }
-
-            $this->load_config();
-            $this->load_db();
-            $this->load_migrations();
-
-            switch ($this->options['action']) {
-                case 'create':
-                    $this->create();
-                    break;
-                case 'show_new':
-                    $this->show_new();
-                    break;
-                case 'show_applied':
-                    $this->show_applied();
-                    break;
-                case 'show_all':
-                    $this->show_all();
-                    break;
-                case 'mark_all':
-                    $this->mark_all();
-                    break;
-                case 'mark':
-                    $this->mark();
-                    break;
-                case 'apply_new':
-                    $this->apply_new();
-                    break;
-                case 'apply':
-                    $this->apply();
-                    break;
-                default:
-                    die($this->console->format('Aborting, invalid action specified', 'red'));
+            // Check if config file is set in ENV
+            ($envConfig = getenv('TURTLE_CONFIG')) ? $this->options['config'] = $envConfig : 0;
+            // Get options
+            $this->options = array_merge(
+                $this->options,
+                getopt('', array(
+                    'config:',
+                    'dry-run',
+                ))
+            );
+            // Get commands
+            $args = array_slice($argv, 1);
+            // Commands do not start with a dash
+            foreach ($args as $key => $arg) if ($arg{0} === '-') unset($args[$key]);
+            $cmd = array_shift($args);
+            $param = array_shift($args);
+            // Execute command if we have method for it
+            if (method_exists($this, $cmd) && !empty($param)) {
+                if (isset($this->options['dry-run'])) $this->success('Running dry');
+                $this->load_config();
+                $this->load_db();
+                $this->load_migrations();
+                $this->$cmd($param);
+            } else {
+                $this->help();
             }
         }
 
         public function __destruct() {
-            @$this->db->close();
+            if (!is_null($this->db)) {
+                $this->db->commit();
+                $this->db->close();
+            }
         }
 
+        /**
+         * Display help
+         */
+        protected function help() {
+            $message = 'Usage: ./migrate.php [options] command argument' . PHP_EOL . PHP_EOL;
+            $message.= 'Available commands:' . PHP_EOL . PHP_EOL;
+            $message.= $this->console->format('  create <file_name>', 'white');
+            $message.= '      Creates new migration file.' . PHP_EOL . PHP_EOL;
+            $message.= $this->console->format('  show new|applied|all', 'white');
+            $message.= '      Shows migrations files.' . PHP_EOL . PHP_EOL;
+            $message.= $this->console->format('  mark all|<file_name>', 'white');
+            $message.= '      Marks migration(s) as applied.' . PHP_EOL . PHP_EOL;
+            $message.= $this->console->format('  apply new|<file_name>', 'white');
+            $message.= '      Applies migration(s).' . PHP_EOL . PHP_EOL;
+            $message.= 'Available options:' . PHP_EOL . PHP_EOL;
+            $message.= $this->console->format('  --config=<config_file>', 'white');
+            $message.= '      Use <config_file>. Default config file is turtle.conf. Can also be set by environment variable TURTLE_CONFIG.' . PHP_EOL . PHP_EOL;
+            $message.= $this->console->format('  --dry-run', 'white');
+            $message.= '      Do not run any SQL queries, display them instead.';
+            $this->message($message);
+        }
+
+        /**
+         * Loads config file
+         */
         protected function load_config() {
-            if (!is_file($this->options['config'])) {
-                die($this->console->format("Aborting, specified config file doesn't exist", 'red'));
+            if (!is_readable($this->options['config'])) {
+                $this->abort("Aborting, specified config file isn't readable");
             }
-
             if (!($this->config = parse_ini_file($this->options['config'], true))) {
-                die($this->console->format('Aborting, error reading config file', 'red'));
+                $this->abort('Aborting, error reading config file');
             }
         }
 
+        /**
+         * Load migrations from migrations directory files
+         */
         protected function load_migrations() {
             if (empty($this->config['migrations']['dir'])) {
-                die($this->console->format('Aborting, migrations directory missing from config file', 'red'));
+                $this->abort('Aborting, migrations directory missing from config file');
             }
-
             if (!is_dir($this->config['migrations']['dir'])) {
-                die($this->console->format("Aborting, migrations directory doesn't exist", 'red'));
+                $this->abort("Aborting, migrations directory doesn't exist");
             }
-
-            $this->migrations = array();
             $this->migrationsMax = 0;
             $dir = dir($this->config['migrations']['dir']);
-
             while (($filename = $dir->read()) !== false) {
                 if (preg_match('/^([0-9]+)[\._-][a-z0-9_-]+\.sql$/i', $filename, $matches)) {
                     $this->migrations[$filename] = $this->db_migration_applied($filename);
@@ -95,10 +105,12 @@
                     }
                 }
             }
-
             ksort($this->migrations);
         }
 
+        /**
+         * Connect to database and call create table method
+         */
         protected function load_db() {
             $this->db = @new \mysqli(
                 $this->config['mysql']['host'],
@@ -106,38 +118,48 @@
                 $this->config['mysql']['pass'],
                 $this->config['mysql']['db']
             );
-
             if (mysqli_connect_error()) {
-                die($this->console->format(sprintf(
+                $this->abort(sprintf(
                     'Aborting, unable to connect to database (%d: %s)',
                     mysqli_connect_errno(),
                     mysqli_connect_error()
-                ), 'red'));
+                ));
             }
-
             $this->db->set_charset($this->config['mysql']['charset']);
             $this->db_create_table();
         }
 
+        /**
+         * Create migrations table if it does not exist yet
+         */
         protected function db_create_table() {
-            $this->db->query(sprintf(
-                '
-                    create table if not exists %s (
-                        filename varchar(250) not null,
-                        date_applied datetime not null,
-                        primary key(filename)
-                    ) engine=%s default charset=%s
-                ',
+            $query = sprintf(
+                'create table if not exists %s (' . PHP_EOL .
+                '  filename varchar(250) not null,' . PHP_EOL .
+                '  script text,' . PHP_EOL .
+                '  date_applied timestamp not null default current_timestamp on update current_timestamp,' . PHP_EOL .
+                '  primary key(filename)' . PHP_EOL .
+                ') engine=%s default charset=%s',
                 $this->config['mysql']['table'],
                 $this->config['mysql']['engine'],
                 $this->config['mysql']['charset']
-            ));
+            );
+            if (isset($this->options['dry-run'])) {
+                $this->message($query);
+            } else {
+                $this->db->query($query);
+            }
         }
 
+        /**
+         * Return date when the migration was applied
+         *
+         * @param string $filename
+         * @return null
+         */
         protected function db_migration_applied($filename) {
             $dateApplied = null;
             $filename = $this->db->real_escape_string($filename);
-
             if ($result = $this->db->query(sprintf("
                 select
                     date_applied
@@ -151,27 +173,32 @@
                 }
                 $result->free();
             }
-
             return $dateApplied;
         }
 
+        /**
+         * Insert migration filename into table as applied one
+         *
+         * @param string $filename
+         */
         protected function db_mark_applied($filename) {
-            $filename = $this->db->real_escape_string($filename);
-
-            $this->db->query(sprintf("
-                insert into %s (
-                    filename, date_applied
-                ) values (
-                    '%s', now()
-                )
-            ", $this->config['mysql']['table'], $filename));
+            $query = sprintf(
+                "insert into %s (filename, script) values ('%s', '%s')",
+                $this->config['mysql']['table'],
+                $this->db->real_escape_string($filename),
+                $this->db->real_escape_string(file_get_contents($this->get_full_path($filename)))
+            );
+            if (!$this->db->query($query)) {
+                $this->abort($this->db->error);
+            }
         }
 
-        protected function create() {
-            if (empty($this->options['name'])) {
-                die($this->console->format('Aborting, no name specified for the new migration file', 'red'));
-            }
-
+        /**
+         * Command: create <filename>
+         *
+         * @param string $name
+         */
+        protected function create($name) {
             $filename = sprintf(
                 '%s.%s.sql',
                 str_pad(
@@ -180,183 +207,234 @@
                     '0',
                     STR_PAD_LEFT
                 ),
-                $this->create_filename($this->options['name'])
+                $this->create_filename($name)
             );
-
-            if (@touch($this->get_full_filename($filename))) {
-                echo $this->console->format(sprintf('Created new migration file: %s', $filename), 'green');
+            if (@touch($this->get_full_path($filename))) {
+                $this->success(sprintf('Created new migration file: %s', $filename));
             } else {
-                die($this->console->format('Aborting, unable to write file', 'red'));
+                $this->abort('Aborting, unable to write file');
             }
         }
 
+        /**
+         * Show command fabric
+         * To add new show command, create new method named "show_your_new_command_name"
+         *
+         * @param string $param
+         */
+        protected function show($param) {
+            $method = 'show_' . $param;
+            if (method_exists($this, $method)) {
+                $this->$method();
+            } else {
+                $this->error('Invalid command argument!');
+                $this->help();
+            }
+        }
+
+        /**
+         * Command: show new
+         */
         protected function show_new() {
-            if (!empty($this->migrations)) {
-                foreach ($this->migrations as $filename => $dateApplied) {
-                    if (is_null($dateApplied)) {
-                        echo $this->console->format(sprintf('( ) %s', $filename), 'grey');
-                    }
+            foreach ($this->migrations as $filename => $dateApplied) {
+                if (is_null($dateApplied)) {
+                    $this->message(sprintf('[ ] %s', $filename));
                 }
             }
         }
 
+        /**
+         * Command: show applied
+         */
         protected function show_applied() {
-            if (!empty($this->migrations)) {
-                foreach ($this->migrations as $filename => $dateApplied) {
-                    if (!is_null($dateApplied)) {
-                        echo $this->console->format(sprintf('(x) %s on %s', $filename, $dateApplied), 'green');
-                    }
+            foreach ($this->migrations as $filename => $dateApplied) {
+                if (!is_null($dateApplied)) {
+                    $this->success(sprintf('[x] %s on %s', $filename, $dateApplied));
                 }
             }
         }
 
+        /**
+         * Command: show all
+         */
         protected function show_all() {
-            if (!empty($this->migrations)) {
-                foreach ($this->migrations as $filename => $dateApplied) {
-                    echo $this->console->format(sprintf(
-                        "(%s) %s",
-                        (!is_null($dateApplied) ? 'x' : ' '),
-                        $filename
-                    ), (!is_null($dateApplied) ? 'green' : 'grey'));
-                }
+            foreach ($this->migrations as $filename => $dateApplied) {
+                echo $this->console->format(sprintf(
+                    "[%s] %s",
+                    (!is_null($dateApplied) ? 'x' : ' '),
+                    $filename
+                ), (!is_null($dateApplied) ? 'green' : 'grey'));
             }
         }
 
+        /**
+         * Mark command fabric
+         *
+         * @param string $param
+         */
+        protected function mark($param) {
+            $method = 'mark_' . $param;
+            if (method_exists($this, $method)) {
+                $this->$method();
+            } else {
+                $this->_mark($param);
+            }
+        }
+
+        /**
+         * Marks all migrations as applied
+         * Command: mark all
+         */
         protected function mark_all() {
-            if (!empty($this->migrations)) {
-                foreach ($this->migrations as $filename => $dateApplied) {
-                    if (is_null($dateApplied)) {
-                        echo $this->console->format(sprintf("Marking %s as applied", $filename), 'green');
-                        $this->db_mark_applied($filename);
-                    }
+            foreach ($this->migrations as $filename => $dateApplied) {
+                if (is_null($dateApplied)) {
+                    $this->success(sprintf("Marking %s as applied", $filename));
+                    $this->db_mark_applied($filename);
                 }
             }
         }
 
-
-        protected function mark() {
-            if (empty($this->options['filename'])) {
-                die($this->console->format('Aborting, no migration specified', 'red'));
+        /**
+         * Mark the migration as applied
+         * Command: mark <filename>
+         *
+         * @param string $filename
+         */
+        protected function _mark($filename) {
+            if (!is_null($this->migrations[$filename])) {
+                $this->abort(sprintf('Aborting, %s already applied', $this->options['filename']));
             }
-
-            if (!array_key_exists($this->options['filename'], $this->migrations)) {
-                die($this->console->format(sprintf("Aborting, %s doesn't exist", $this->options['filename']), 'red'));
-            }
-
-            if (!is_null($this->migrations[$this->options['filename']])) {
-                die($this->console->format(sprintf(
-                    'Aborting, %s already applied',
-                    $this->options['filename']
-                ), 'red'));
-            }
-
-            printf($this->console->format(sprintf('Marking %s as applied', $filename), 'red'));
-            $this->db_mark_applied($this->options['filename']);
+            $this->error(sprintf('Marking %s as applied', $filename));
+            $this->db_mark_applied($filename);
         }
 
+        /**
+         * Apply command fabric
+         * Command: apply <filename>
+         *
+         * @param string $param
+         */
+        protected function apply($param) {
+            $method = 'apply_' . $param;
+            if (method_exists($this, $method)) {
+                $this->$method();
+            } else {
+                $this->_apply($param);
+            }
+        }
+
+        /**
+         * Applies all new migrations
+         * Command: apply new
+         */
         protected function apply_new() {
-            if (!empty($this->migrations)) {
-                foreach ($this->migrations as $filename => $dateApplied) {
-                    if (is_null($dateApplied)) {
-                        if ($this->mysql_cmd($filename)) {
-                            $this->db_mark_applied($filename);
-                        } else {
-                            die($this->console->format(sprintf(
-                                'Aborting, %s failed so no further migrations will be applied',
-                                $filename
-                            ), 'red'));
-                        }
+            foreach ($this->migrations as $filename => $dateApplied) {
+                if (is_null($dateApplied)) {
+                    if ($this->mysql_cmd($filename)) {
+                        $this->db_mark_applied($filename);
+                    } else {
+                        $this->abort(sprintf('Aborting, %s failed so no further migrations will be applied', $filename));
                     }
                 }
             }
         }
 
-        protected function apply() {
-            if (empty($this->options['filename'])) {
-                die($this->console->format('Aborting, no migration specified', 'red'));
+        protected function _apply($filename) {
+            if (!array_key_exists($filename, $this->migrations)) {
+                $this->abort(sprintf("Aborting, %s doesn't exist", $filename));
             }
-
-            if (!array_key_exists($this->options['filename'], $this->migrations)) {
-                die($this->console->format(sprintf("Aborting, %s doesn't exist", $this->options['filename']), 'red'));
-            }
-
             if (!is_null($this->migrations[$this->options['filename']])) {
-                die($this->console->format(sprintf(
-                    'Aborting, %s already applied',
-                    $this->options['filename']
-                ), 'red'));
+                $this->abort(sprintf('Aborting, %s already applied', $filename));
             }
-
             if ($this->mysql_cmd($this->options['filename'])) {
                 $this->db_mark_applied($this->options['filename']);
             }
         }
 
+        /**
+         * Run SQL migrations from file
+         * Multiple queries are supported
+         * Rolls back if possible (actually works with InnoDB only)
+         *
+         * @param string $filename
+         * @return bool
+         */
         protected function mysql_cmd($filename) {
-            if (empty($this->config['mysql']['binary'])) {
-                die($this->console->format('Aborting, mysql binary path not specified', 'red'));
-            }
-
-            if (!file_exists($this->config['mysql']['binary'])) {
-                die($this->console->format("Aborting, mysql binary doesn't exist", 'red'));
-            }
-
             $startTime = microtime(true);
-
-            if (!empty($this->config['mysql']['useTransactions'])) {
+            $queries = file_get_contents($this->get_full_path($filename));
+            if (isset($this->options['dry-run'])) {
+                $this->message($queries);
+                return true;
+            } else {
                 $this->db->autocommit(false);
-            }
-
-            if (trim($this->config['mysql']['pass']) == '') {
-                exec(sprintf(
-                    '%s -u%s %s < %s 2>&1',
-                    $this->config['mysql']['binary'],
-                    $this->config['mysql']['user'],
-                    $this->config['mysql']['db'],
-                    escapeshellarg($this->get_full_filename($filename))
-                ), $result, $code);
-            } else {
-                exec(sprintf(
-                    '%s -u%s -p%s %s < %s 2>&1',
-                    $this->config['mysql']['binary'],
-                    $this->config['mysql']['user'],
-                    $this->config['mysql']['pass'],
-                    $this->config['mysql']['db'],
-                    escapeshellarg($this->get_full_filename($filename))
-                ), $result, $code);
-            }
-
-            if ($code == 0) {
-                if (!empty($this->config['mysql']['useTransactions'])) {
+                $i = 1;
+                if ($this->db->multi_query($queries)) {
+                    do {
+                        $i++;
+                        if ($result = $this->db->store_result()) {
+                            $result->free();
+                        }
+                    } while (@$this->db->next_result());
+                    if ($error = $this->db->error) {
+                        $this->db->rollback();
+                        $this->abort(sprintf('Error at query %d in %s: %s', $i, $filename, $error));
+                    }
                     $this->db->commit();
-                }
-
-                echo $this->console->format(sprintf('%s applied in %f seconds', $filename, (microtime(true) - $startTime)), 'green');
-            } else {
-                if (!empty($this->config['mysql']['useTransactions'])) {
+                    $this->success(sprintf('%s applied in %f seconds', $filename, (microtime(true) - $startTime)));
+                    return true;
+                } else {
                     $this->db->rollback();
+                    $this->error(sprintf("An error occurred while applying %s: %s", $filename, $this->db->error));
+                    return false;
                 }
-
-                echo $this->console->format(sprintf("An error occurred while applying %s", $filename), 'red');
-                echo $this->console->format(str_pad('-', 30, '-', STR_PAD_LEFT), 'red');
-                echo $this->console->format(implode("\n", $result), 'red');
-                echo $this->console->format(str_pad('-', 30, '-', STR_PAD_LEFT), 'red');
             }
-
-            return $code == 0;
         }
 
+        /**
+         * Create formatted migration file name
+         *
+         * @param string $input
+         * @return string
+         */
         protected function create_filename($input) {
             $filename = trim($input);
             $filename = preg_replace('/[^a-z0-9 -]/i', '', $filename);
             $filename = str_replace(' ', '-', $filename);
             $filename = strtolower($filename);
-
             return $filename;
         }
 
+        /**
+         * Get fully qualified path of a migration file
+         *
+         * @param string $filename
+         * @return string
+         */
         protected function get_full_path($filename) {
-            return rtrim($this->config['migrations']['dir'], '/')."/$filename";
+            return rtrim($this->config['migrations']['dir'], DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $filename;
+        }
+
+        /* Messaging methods */
+
+        protected function abort($message) {
+            $this->error($message);
+            die;
+        }
+
+        protected function error($message) {
+            echo $this->console->format($message, 'red');
+        }
+
+        protected function warning($message) {
+            echo $this->console->format($message, 'yellow');
+        }
+
+        protected function success($message) {
+            echo $this->console->format($message, 'green');
+        }
+
+        protected function message($message) {
+            echo $this->console->format($message, 'gray');
         }
     }
 ?>

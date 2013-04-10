@@ -2,9 +2,11 @@
 
 A simple script for managing mysql database schema via raw SQL migration files.
 
-## Author/Copyright
+## Authors/Copyright
 
-Copyright (c) Brightfish Software Limited (author, Ed Eliot)
+Copyright (c) Brightfish Software Limited
+
+Authors: Ed Eliot, Dmitry Vovk
 
 ## License
 
@@ -12,7 +14,11 @@ BSD License - see license file
 
 ## Config Format
 
-Turtle gets many default settings from a config file. When running Turtle commands you specify the path to the config file you want to use. Here's an example config:
+Turtle gets settings from a config file. The config file uses the ini file format and can be supplied in one of 3 ways:
+
+1. Modifying the default (turtle.conf) that is supplied with the distribution.
+2. Setting the config path in an environment variable called TURTLE_CONFIG.
+3. Specifying as a command line parameter `--config=<path to config file>`.
 
 ```ini
 [mysql]
@@ -23,8 +29,6 @@ db = "testdb"
 table = "migrations"
 engine = "myisam"
 charset = "utf8"
-binary = "mysql"
-useTransactions = false
 
 [migrations]
 dir = "sample-migrations"
@@ -41,38 +45,64 @@ The `dir` key within the migrations section should contain the full path to your
 
 The following command creates a new empty migration file with a correctly structured filename and sequence number prepended to the start of the filename.
 
-    ./migrate.php --config=[location of config file] --action=create --name="A Test Name"
-
-This example will create
-
-001.a-test-name.sql
+    ./migrate.php create <migration name>
 
 ### Show New (unapplied) Migrations
 
-    ./migrate.php --config=[clocation of config file] --action=show_new
+    ./migrate.php show new
 
 ### Show Applied Migrations
 
-    ./migrate.php --config=[location of config file] --action=show_applied
+    ./migrate.php show applied
 
 ### Show All Migrations
 
-    ./migrate.php --config=[location of config file] --action=show_all
+    ./migrate.php show all
 
 ### Mark All
 
 Mark all migrations as applied (without actually applying them)
 
-    ./migrate.php --config=[location of config file] --action=mark_all
+    ./migrate.php mark all
 
 ### Mark (a specific migration)
 
-    ./migrate.php --config=[location of config file] --action=mark --filename=[filename excluding path]
+    ./migrate.php mark <filename>
 
 ### Apply New (unapplied) Migrations
 
-    ./migrate.php --config=[location of config file] --action=apply_new
+    ./migrate.php apply new
 
 ### Apply (a specific migration)
 
-    ./migrate.php --config=[location of config file] --action=apply --filename=[filename excluding path]
+    ./migrate.php apply <filename>
+
+## Change Log
+
+### 0.0.2
+
+Restructuring and improvements to command line parameters and usage
+
+* Changes:
+  - Command line parameters changed:
+    + Commands are entered without prefix.
+    + Options can be set with -- prefix.
+  - Config file can be set using three ways:
+    1. Using default config file: turtle.conf.
+    2. Using environment variable TURTLE_CONFIG.
+    3. Using command line parameter --config=<filename>.
+  - Use of internal mysqli method to run SQL migration instead of standalone mysql executable.
+  - Display failed query in multi query migrations.
+  - Extracted methods for messaging: 'error', 'success', 'message', and 'abort'.
+  - Always trying to use COMMIT/ROLLBACK. Ignored with MyISAM, but works with InnoDB.
+  - Implemented functional dry run support.
+  - Added help message.
+  - Added automatic timestamping to migrations table scheme.
+  - Added storing of applied migration(s) to migration table.
+  - Fix minor issue with method name: 'get_full_path' instead of 'get_full_filename'.
+  - Fix minor issue with undefined variable $filename in method 'mark' (now '_mark').
+  - Added annotations.
+
+ ### 0.0.1
+
+ Initial release
