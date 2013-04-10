@@ -17,7 +17,7 @@ BSD License - see license file
 Turtle gets settings from a config file. The config file uses the ini file format and can be supplied in one of 3 ways:
 
 1. Modifying the default (turtle.conf) that is supplied with the distribution.
-2. Setting the config path in an environment variable called `TURTLE_CONFIG`.
+2. Setting the config path in an environment variable called TURTLE_CONFIG `export TURTLE_CONFIG=/path/to/turtle.conf`.
 3. Specifying as a command line parameter `--config=<path to config file>`.
 
 ```ini
