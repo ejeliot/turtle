@@ -45,7 +45,7 @@ The `dir` key within the migrations section should contain the full path to your
 
 The following command creates a new empty migration file with a correctly structured filename and sequence number prepended to the start of the filename.
 
-    ./migrate.php create <migration name>
+    ./migrate.php create <migration_name>
 
 ### Show New (unapplied) Migrations
 
