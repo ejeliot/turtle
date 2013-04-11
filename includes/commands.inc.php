@@ -290,7 +290,7 @@ class Commands extends Migrate {
             $this->config['mysql']['table'],
             $dateTime
         );
-        $this->config['migrations']['last_migration'] = date('Y-m-d H:i:s');
+        $this->config['migrations']['lastMigration'] = date('Y-m-d H:i:s');
         $result = $this->query($query);
         $db = '';
         while ($table = $result->fetch_assoc()) {
