@@ -313,10 +313,10 @@ class Commands extends Migrate {
      */
     protected function get_timestamp($param) {
         if ($param === '-') {
-            if (empty($this->config['migrations']['last_migration'])) {
+            if (empty($this->config['migrations']['lastMigration'])) {
                 $this->abort('Cannot use "-", no previous migration time is present!');
             } else {
-                return strtotime($this->config['migrations']['last_migration']);
+                return strtotime($this->config['migrations']['lastMigration']);
             }
         } else {
             return strtotime($param);

@@ -15,4 +15,8 @@ require 'includes/console.inc.php';
 require 'includes/migrate.inc.php';
 require 'includes/commands.inc.php';
 
+if (!ini_get('date.timezone')) {
+    date_default_timezone_set('UTC');
+}
+
 new Brightfish\Turtle\Commands($argv);
