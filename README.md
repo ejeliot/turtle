@@ -99,6 +99,7 @@ Show create table syntax for a specific table.
 
 ### Options
 
+* `--config` - Specify alternative config file
 * `--dry-run` - show what actions would be taken but don't actually change anything
 * `--no-colour` - suppress console colours
 * `--verbose` - show more detailed messaging
