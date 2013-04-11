@@ -29,12 +29,18 @@ class Migrate {
         // Get commands
         $args = array_slice($argv, 1);
         // Commands do not start with a dash
-        foreach ($args as $key => $arg) if ($arg{0} === '-') unset($args[$key]);
+        foreach ($args as $key => $arg) {
+            if ($arg{0} === '-') {
+                unset($args[$key]);
+            }
+        }
         $cmd = array_shift($args);
         $param = array_shift($args);
         // Execute command if we have method for it
         if (method_exists($this, $cmd) && !empty($param)) {
-            if (isset($this->options['dry-run'])) $this->success('Running dry');
+            if (isset($this->options['dry-run'])) {
+                $this->success('Running dry');
+            }
             $this->load_config();
             $this->load_db();
             $this->load_migrations();
@@ -199,16 +205,23 @@ class Migrate {
      * @param string $name
      */
     protected function create($name) {
-        $filename = sprintf(
-            '%s.%s.sql',
-            str_pad(
+        if ($this->config['migrations']['incFormat'] == 'timestamp') {
+            $incValue = time();
+        } else {
+            $incValue = str_pad(
                 $this->migrationsMax + 1,
                 $this->config['migrations']['incLength'],
                 '0',
                 STR_PAD_LEFT
-            ),
+            );
+        }
+
+        $filename = sprintf(
+            '%s.%s.sql',
+            $incValue,
             $this->create_filename($name)
         );
+
         if (@touch($this->get_full_path($filename))) {
             $this->success(sprintf('Created new migration file: %s', $filename));
         } else {

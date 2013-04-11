@@ -32,12 +32,20 @@ charset = "utf8"
 
 [migrations]
 dir = "sample-migrations"
+incFormat = "auto"
 incLength = 3
 ```
 
 The `host`, `user`, `pass` and `db` keys within the `mysql` section should be fairly self-explanatory. The `table` key specifies the name of the table you wish to use to store migration information. The `engine` and `charset` keys define what MySql table engine and character set should be used when creating the migrations table. They have no bearing on the table engine and character set used for the rest of the tables in your database. Setting `useTransations` to true will make Turtle wrap each migration run within a transaction. If the migration succeeds the transaction will be committed. If it fails for any reason the tranasction will be rolled back which will restore your database to the state it was in right before you tried to apply the failed migration. `useTranasctions` should only be set to true if you aren't using MyISAM tables in your database.
 
-The `dir` key within the migrations section should contain the full path to your migration files. `incLength` determines what length the auto increment number assigned when creating a new migration should be padded to. For example when creating a migration with an auto increment of 1 it'll be padded to 001.
+The `dir` key within the migrations section should contain the full path to your migration files.
+
+Turtle supports two schemes for numbering migrations:
+
+1. An auto increment number which is padded to `incLength` digits.
+2. A timestamp.
+
+The auto increment number format is the default however you may want to consider the timestamp scheme when many developers are contributing migrations to a project and might generate migrations with the same auto increment numbers.
 
 ## Usage
 
@@ -78,6 +86,10 @@ Mark all migrations as applied (without actually applying them)
     ./migrate.php apply <filename>
 
 ## Change Log
+
+### 0.0.3
+
+Added support for timestamp numbering in addition to the default auto increment scheme.
 
 ### 0.0.2
 

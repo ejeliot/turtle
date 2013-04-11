@@ -8,7 +8,7 @@
 /* Copyright (c): Brightfish Software Limited     */
 /* Last Updated:  10th April 2013                 */
 /* License:       BSD (see included license file) */
-/* Version:       0.0.2                           */
+/* Version:       0.0.3                           */
 /**************************************************/
 
 require 'includes/console.inc.php';
