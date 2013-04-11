@@ -69,13 +69,23 @@ The following command creates a new empty migration file with a correctly struct
 
 ### Mark All
 
-Mark all migrations as applied (without actually applying them)
+Mark all migrations as applied (without actually applying them).
 
     ./migrate.php mark all
 
 ### Mark (a specific migration)
 
     ./migrate.php mark <filename>
+
+### Mark All
+
+Unmark all migrations as applied.
+
+    ./migrate.php unmark all
+
+### Unmark (a specific migration)
+
+    ./migrate.php unmark <filename>
 
 ### Apply New (unapplied) Migrations
 
@@ -112,11 +122,11 @@ Added command to dump one or all tables
 
     ./migrate.php dump books # Dumps table 'books'
 
-    ./migrate.php dump % # Dumps all tables except migrations one
+    ./migrate.php dump % # Dumps all tables except the migration table
 
 Added option for verbose output `--verbose`.
 
-Split Migrate class into two: Migrate and Commands. Latter extends former and holds commands implementations.
+Split Migrate class into two: Migrate and Commands. Latter extends former and holds command implementations.
 
 ### 0.0.4 (11th April 2013)
 

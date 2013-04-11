@@ -71,6 +71,8 @@ class Migrate {
         $message.= '      Shows migrations files.' . PHP_EOL . PHP_EOL;
         $message.= $this->console->format('  mark all|<file_name>', 'white');
         $message.= '      Marks migration(s) as applied.' . PHP_EOL . PHP_EOL;
+        $message.= $this->console->format('  unmark all|<file_name>', 'white');
+        $message.= '      Unmarks migration(s) as applied.' . PHP_EOL . PHP_EOL;
         $message.= $this->console->format('  apply new|<file_name>', 'white');
         $message.= '      Applies migration(s).' . PHP_EOL . PHP_EOL;
         $message.= $this->console->format('  dump <table_name>|%', 'white');
@@ -198,6 +200,22 @@ class Migrate {
             $this->config['mysql']['table'],
             $this->db->real_escape_string($filename),
             $this->db->real_escape_string(file_get_contents($this->get_full_path($filename)))
+        );
+        if (!$this->query($query)) {
+            $this->abort($this->db->error);
+        }
+    }
+
+    /**
+     * Remove migration filename from table
+     *
+     * @param string $filename
+     */
+    protected function db_unmark_applied($filename) {
+        $query = sprintf(
+            'DELETE FROM `%s` WHERE `filename` = "%s"',
+            $this->config['mysql']['table'],
+            $this->db->real_escape_string($filename)
         );
         if (!$this->query($query)) {
             $this->abort($this->db->error);

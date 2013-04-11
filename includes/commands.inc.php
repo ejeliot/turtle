@@ -123,10 +123,51 @@ class Commands extends Migrate {
      */
     protected function _mark($filename) {
         if (!is_null($this->migrations[$filename])) {
-            $this->abort(sprintf('Aborting, %s already applied', $this->options['filename']));
+            $this->abort(sprintf('Aborting, %s already applied', $filename));
         }
-        $this->error(sprintf('Marking %s as applied', $filename));
+        $this->success(sprintf('Marking %s as applied', $filename));
         $this->db_mark_applied($filename);
+    }
+
+    /**
+     * Unmark command fabric
+     *
+     * @param string $param
+     */
+    protected function unmark($param) {
+        $method = 'unmark_' . $param;
+        if (method_exists($this, $method)) {
+            $this->$method();
+        } else {
+            $this->_unmark($param);
+        }
+    }
+
+    /**
+     * Unmarks all migrations as applied
+     * Command: unmark all
+     */
+    protected function unmark_all() {
+        foreach ($this->migrations as $filename => $dateApplied) {
+            if (!is_null($dateApplied)) {
+                $this->success(sprintf("Unmarking %s as applied", $filename));
+                $this->db_unmark_applied($filename);
+            }
+        }
+    }
+
+    /**
+     * Unmark the migration as applied
+     * Command: unmark <filename>
+     *
+     * @param string $filename
+     */
+    protected function _unmark($filename) {
+        if (is_null($this->migrations[$filename])) {
+            $this->abort(sprintf('Aborting, %s not applied', $filename));
+        }
+        $this->success(sprintf('Unmarking %s as applied', $filename));
+        $this->db_unmark_applied($filename);
     }
 
     /**
