@@ -116,6 +116,10 @@ Show create table syntax for a specific table.
 
 ## Change Log
 
+### 0.0.6 (11th April 2013)
+
+Added unmark and unmark all commands.
+
 ### 0.0.5 (11th April 2013)
 
 Added command to dump one or all tables
