@@ -87,11 +87,11 @@ Mark all migrations as applied (without actually applying them)
 
 ## Change Log
 
-### 0.0.3
+### 0.0.3 (1th April 2013)
 
 Added support for timestamp numbering in addition to the default auto increment scheme.
 
-### 0.0.2
+### 0.0.2 (10th April 2013)
 
 Restructuring and improvements to command line parameters and usage:
 
@@ -114,6 +114,6 @@ Restructuring and improvements to command line parameters and usage:
 * Fix minor issue with undefined variable $filename in method 'mark' (now '_mark').
 * Added annotations.
 
-### 0.0.1
+### 0.0.1 (9th April 2013)
 
 Initial release
