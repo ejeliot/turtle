@@ -85,6 +85,24 @@ Mark all migrations as applied (without actually applying them)
 
     ./migrate.php apply <filename>
 
+### Dump All
+
+Show create table syntax for all tables.
+
+    ./migrate dump %
+
+### Dump
+
+Show create table syntax for a specific table.
+
+    ./migrate dump <table_name>
+
+### Options
+
+* --dry-run - show what actions would be taken but don't actually change anything
+* --no-colour - suppress console colours
+* --verbose - show more detailed messaging
+
 ## Change Log
 
 ### 0.0.5 (11th April 2013)

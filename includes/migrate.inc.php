@@ -77,13 +77,13 @@ class Migrate {
         $message.= '      Dumps schema of <table_name> or all tables.' . PHP_EOL . PHP_EOL;
         $message.= 'Available options:' . PHP_EOL . PHP_EOL;
         $message.= $this->console->format('  --config=<config_file>', 'white');
-        $message.= '      Use <config_file>. Default config file is turtle.conf. Can also be set by environment variable TURTLE_CONFIG.' . PHP_EOL . PHP_EOL;
+        $message.= '      Use <config_file>. Default config file is turtle.conf. Can also be set with environment variable TURTLE_CONFIG.' . PHP_EOL . PHP_EOL;
         $message.= $this->console->format('  --dry-run', 'white');
         $message.= '      Do not run any SQL queries, display them instead.' . PHP_EOL . PHP_EOL;
         $message.= $this->console->format('  --no-colour', 'white');
-        $message.= '      Do not use console colours.' . PHP_EOL . PHP_EOL;
+        $message.= '      Suppress console colours.' . PHP_EOL . PHP_EOL;
         $message.= $this->console->format('  --verbose', 'white');
-        $message.= '      Show everything what\'s going on.';
+        $message.= '      Show more detailed messaging.';
         $this->message($message);
     }
 
