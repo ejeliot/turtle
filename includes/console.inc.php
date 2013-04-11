@@ -20,7 +20,7 @@ class Console {
     public function format($input, $colour = '', $nl = true) {
         $output = $this->noColour
                 ? $input
-                : sprintf(self::TEMPLATE, $this->getColour($colour), $input);
+                : sprintf(self::TEMPLATE, $this->get_colour($colour), $input);
 
         if ($nl) {
             $output .= PHP_EOL;
@@ -29,7 +29,7 @@ class Console {
         return $output;
     }
 
-    protected function getColour($colourName) {
+    protected function get_colour($colourName) {
         return isset($this->colours[$colourName]) ? $this->colours[$colourName] : '';
     }
 }
