@@ -15,7 +15,6 @@ class Migrate {
     protected $console;
 
     public function __construct($argv) {
-        $this->console = new Console();
         // Check if config file is set in ENV
         ($envConfig = getenv('TURTLE_CONFIG')) ? $this->options['config'] = $envConfig : 0;
         // Get options
@@ -24,8 +23,10 @@ class Migrate {
             getopt('', array(
                 'config:',
                 'dry-run',
+                'no-colour',
             ))
         );
+        $this->console = new Console(isset($this->options['no-colour']));
         // Get commands
         $args = array_slice($argv, 1);
         // Commands do not start with a dash
@@ -76,6 +77,8 @@ class Migrate {
         $message.= '      Use <config_file>. Default config file is turtle.conf. Can also be set by environment variable TURTLE_CONFIG.' . PHP_EOL . PHP_EOL;
         $message.= $this->console->format('  --dry-run', 'white');
         $message.= '      Do not run any SQL queries, display them instead.';
+        $message.= $this->console->format('  --no-colour', 'white');
+        $message.= '      Do not use console colours.';
         $this->message($message);
     }
 

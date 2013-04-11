@@ -87,7 +87,11 @@ Mark all migrations as applied (without actually applying them)
 
 ## Change Log
 
-### 0.0.3 (1th April 2013)
+### 0.0.4 (11th April 2013)
+
+Added option to disable console colours `--no-colour`. Useful for scripting and automated output parsing.
+
+### 0.0.3 (10th April 2013)
 
 Added support for timestamp numbering in addition to the default auto increment scheme.
 

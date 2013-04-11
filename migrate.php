@@ -6,9 +6,9 @@
 /*                                                */
 /* Authors:       Ed Eliot, Dmitry Vovk           */
 /* Copyright (c): Brightfish Software Limited     */
-/* Last Updated:  10th April 2013                 */
+/* Last Updated:  11th April 2013                 */
 /* License:       BSD (see included license file) */
-/* Version:       0.0.3                           */
+/* Version:       0.0.4                           */
 /**************************************************/
 
 require 'includes/console.inc.php';
