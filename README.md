@@ -99,9 +99,9 @@ Show create table syntax for a specific table.
 
 ### Options
 
-* --dry-run - show what actions would be taken but don't actually change anything
-* --no-colour - suppress console colours
-* --verbose - show more detailed messaging
+* `--dry-run` - show what actions would be taken but don't actually change anything
+* `--no-colour` - suppress console colours
+* `--verbose` - show more detailed messaging
 
 ## Change Log
 
