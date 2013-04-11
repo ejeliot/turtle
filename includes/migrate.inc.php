@@ -77,6 +77,8 @@ class Migrate {
         $message.= '      Applies migration(s).' . PHP_EOL . PHP_EOL;
         $message.= $this->console->format('  dump <table_name>|%', 'white');
         $message.= '      Dumps schema of <table_name> or all tables.' . PHP_EOL . PHP_EOL;
+        $message.= $this->console->format('  log <datetime>', 'white');
+        $message.= '      Dumps all schema altering queries applied since the given date/time.' . PHP_EOL . PHP_EOL;
         $message.= 'Available options:' . PHP_EOL . PHP_EOL;
         $message.= $this->console->format('  --config=<config_file>', 'white');
         $message.= '      Use <config_file>. Default config file is turtle.conf. Can also be set with environment variable TURTLE_CONFIG.' . PHP_EOL . PHP_EOL;

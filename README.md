@@ -107,6 +107,12 @@ Show create table syntax for a specific table.
 
     ./migrate dump <table_name>
 
+### Log
+
+Dumps all schema altering queries applied since the given date/time.
+
+    ./migrate.php log <datetime>
+
 ### Options
 
 * `--config` - Specify alternative config file
@@ -115,6 +121,29 @@ Show create table syntax for a specific table.
 * `--verbose` - show more detailed messaging
 
 ## Change Log
+
+### 0.0.7 (11th April 2013)
+
+Added dumping of schema altering queries applied since any given time `log <timestamp>`. Accepts any meaningful date/time expression parseable by `strtottime()`.
+
+    ./migrate.php log "yesterday"
+
+In order to use this functionality, have mysql logging set to 'table' mode:
+
+    SET global general_log = 1;
+    SET global log_output = 'table';
+
+Make sure you have mysql.general_log table table created:
+
+    CREATE TABLE `general_log` (
+       `event_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+                              ON UPDATE CURRENT_TIMESTAMP,
+       `user_host` mediumtext NOT NULL,
+       `thread_id` bigint(21) unsigned NOT NULL,
+       `server_id` int(10) unsigned NOT NULL,
+       `command_type` varchar(64) NOT NULL,
+       `argument` mediumtext NOT NULL
+    ) ENGINE=CSV DEFAULT CHARSET=utf8 COMMENT='General log';
 
 ### 0.0.6 (11th April 2013)
 

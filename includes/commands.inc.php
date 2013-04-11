@@ -247,7 +247,7 @@ class Commands extends Migrate {
 
     /**
      * Dumps all tables except migration
-     * Command: dump *
+     * Command: dump %
      */
     protected function dump_all() {
         $query = sprintf(
@@ -259,6 +259,37 @@ class Commands extends Migrate {
         while ($table = $result->fetch_assoc()) {
             $tableName = array_pop($table);
             $this->_dump($tableName);
+        }
+    }
+
+    /**
+     * Dumps set of schema altering queries since given point of time
+     *
+     * Command: log <datetime>
+     */
+    public function log($param) {
+        $time = strtotime($param);
+        $track = '^(CREATE TABLE|ALTER TABLE|DROP TABLE|RENAME TABLE)';
+        $query = sprintf(
+            'SELECT `command_type`, `argument` FROM `mysql`.`general_log` WHERE ' .
+            '(`command_type` = "Query" AND UPPER(`argument`) REGEXP "%s" AND `argument` NOT LIKE "%% EXISTS `%s`%%") '.
+            'OR (`command_type` = "Init DB") ' .
+            'AND `event_time` > "%s" ' .
+            'ORDER BY `event_time` ASC',
+            $track,
+            $this->config['mysql']['table'],
+            date('Y-m-d H:i:s', $time)
+        );
+        $result = $this->query($query);
+        $db = '';
+        while ($table = $result->fetch_assoc()) {
+            if ($table['command_type'] === 'Init DB') {
+                $db = $table['argument'];
+                continue;
+            }
+            if ($table['command_type'] === 'Query' && $db === $this->config['mysql']['db']) {
+                $this->message($table['argument'] . ';');
+            }
         }
     }
 }
