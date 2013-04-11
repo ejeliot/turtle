@@ -87,6 +87,18 @@ Mark all migrations as applied (without actually applying them)
 
 ## Change Log
 
+### 0.0.5 (11th April 2013)
+
+Added command to dump one or all tables
+
+    ./migrate.php dump books # Dumps table 'books'
+
+    ./migrate.php dump % # Dumps all tables except migrations one
+
+Added option for verbose output `--verbose`.
+
+Split Migrate class into two: Migrate and Commands. Latter extends former and holds commands implementations.
+
 ### 0.0.4 (11th April 2013)
 
 Added option to disable console colours `--no-colour`. Useful for scripting and automated output parsing.
