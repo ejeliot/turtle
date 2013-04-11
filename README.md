@@ -77,7 +77,7 @@ Mark all migrations as applied (without actually applying them).
 
     ./migrate.php mark <filename>
 
-### Mark All
+### Unmark All
 
 Unmark all migrations as applied.
 
