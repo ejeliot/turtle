@@ -111,7 +111,7 @@ Show create table syntax for a specific table.
 
 Dumps all schema altering queries applied since the given date/time.
 
-    ./migrate.php log <datetime>
+    ./migrate.php log <datetime>|-
 
 ### Options
 
@@ -121,6 +121,12 @@ Dumps all schema altering queries applied since the given date/time.
 * `--verbose` - show more detailed messaging
 
 ## Change Log
+
+### 0.0.8 (11th April 2013)
+
+Added more events to track: 'CREATE TABLE', 'ALTER TABLE', 'DROP TABLE', 'RENAME TABLE', 'CREATE INDEX', 'DROP INDEX', 'CREATE TABLESPACE', 'ALTER TABLESPACE', 'DROP TABLESPACE', 'CREATE VIEW', 'ALTER VIEW', 'DROP VIEW', 'CREATE FUNCTION', 'ALTER FUNCTION', 'DROP FUNCTION', 'CREATE PROCEDURE', 'ALTER PROCEDURE', 'DROP PROCEDURE', 'CREATE EVENT', 'ALTER EVENT', 'DROP EVENT'.
+
+Added "-" parameter to log command. When used, will get timestamp of last log from config file.
 
 ### 0.0.7 (11th April 2013)
 

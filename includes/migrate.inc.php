@@ -32,7 +32,7 @@ class Migrate {
         $args = array_slice($argv, 1);
         // Commands do not start with a dash
         foreach ($args as $key => $arg) {
-            if ($arg{0} === '-') {
+            if ($arg{0} === '-' && $arg !== '-') {
                 unset($args[$key]);
             }
         }
@@ -101,6 +101,20 @@ class Migrate {
         if (!($this->config = parse_ini_file($this->options['config'], true))) {
             $this->abort('Aborting, error reading config file');
         }
+    }
+
+    /**
+     * Saves config file
+     */
+    protected function save_config() {
+        $file = fopen($this->options['config'], 'w+');
+        foreach ($this->config as $name => $section) {
+            fwrite($file, sprintf('[%s]', $name) . PHP_EOL);
+            foreach ($section as $key => $parameter) {
+                fwrite($file, sprintf('%s = "%s"', $key, $parameter) . PHP_EOL);
+            }
+        }
+        fclose($file);
     }
 
     /**

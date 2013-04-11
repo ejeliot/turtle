@@ -263,13 +263,23 @@ class Commands extends Migrate {
     }
 
     /**
-     * Dumps set of schema altering queries since given point of time
+     * Dumps set of schema altering queries since given point of time.
+     * Given "-" as timestamp, will try to use the value saved in config by previous call
      *
-     * Command: log <datetime>
+     * Command: log <datetime>|-
      */
     public function log($param) {
-        $time = strtotime($param);
-        $track = '^(CREATE TABLE|ALTER TABLE|DROP TABLE|RENAME TABLE)';
+        $dateTime = date('Y-m-d H:i:s', $this->get_timestamp($param));
+        $trackCommands = array(
+            'CREATE TABLE', 'ALTER TABLE', 'DROP TABLE', 'RENAME TABLE',
+            'CREATE INDEX', 'DROP INDEX',
+            'CREATE TABLESPACE', 'ALTER TABLESPACE', 'DROP TABLESPACE',
+            'CREATE VIEW', 'ALTER VIEW', 'DROP VIEW',
+            'CREATE FUNCTION', 'ALTER FUNCTION', 'DROP FUNCTION',
+            'CREATE PROCEDURE', 'ALTER PROCEDURE', 'DROP PROCEDURE',
+            'CREATE EVENT', 'ALTER EVENT', 'DROP EVENT',
+        );
+        $track = '^(' . implode('|', $trackCommands) . ')';
         $query = sprintf(
             'SELECT `command_type`, `argument` FROM `mysql`.`general_log` WHERE ' .
             '(`command_type` = "Query" AND UPPER(`argument`) REGEXP "%s" AND `argument` NOT LIKE "%% EXISTS `%s`%%") '.
@@ -278,8 +288,9 @@ class Commands extends Migrate {
             'ORDER BY `event_time` ASC',
             $track,
             $this->config['mysql']['table'],
-            date('Y-m-d H:i:s', $time)
+            $dateTime
         );
+        $this->config['migrations']['last_migration'] = date('Y-m-d H:i:s');
         $result = $this->query($query);
         $db = '';
         while ($table = $result->fetch_assoc()) {
@@ -290,6 +301,25 @@ class Commands extends Migrate {
             if ($table['command_type'] === 'Query' && $db === $this->config['mysql']['db']) {
                 $this->message($table['argument'] . ';');
             }
+        }
+        $this->save_config();
+    }
+
+    /**
+     * Tries to figure out timestamp
+     *
+     * @param string $param
+     * @return int
+     */
+    protected function get_timestamp($param) {
+        if ($param === '-') {
+            if (empty($this->config['migrations']['last_migration'])) {
+                $this->abort('Cannot use "-", no previous migration time is present!');
+            } else {
+                return strtotime($this->config['migrations']['last_migration']);
+            }
+        } else {
+            return strtotime($param);
         }
     }
 }
