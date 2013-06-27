@@ -290,8 +290,8 @@ class Migrate {
                 $this->success(sprintf('%s applied in %f seconds', $filename, (microtime(true) - $startTime)));
                 return true;
             } else {
-                $this->db->rollback();
                 $this->error(sprintf("An error occurred while applying %s: %s", $filename, $this->db->error));
+                $this->db->rollback();
                 return false;
             }
         }
