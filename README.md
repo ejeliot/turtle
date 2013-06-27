@@ -122,6 +122,10 @@ Dumps all schema altering queries applied since the given date/time.
 
 ## Change Log
 
+### 0.0.9 (27th June 2013)
+
+Errors weren't shown when a migration failed because $this->db->error is empty after rollback. Moved messaging so it now works.
+
 ### 0.0.8 (11th April 2013)
 
 Added more events to track: 'CREATE TABLE', 'ALTER TABLE', 'DROP TABLE', 'RENAME TABLE', 'CREATE INDEX', 'DROP INDEX', 'CREATE TABLESPACE', 'ALTER TABLESPACE', 'DROP TABLESPACE', 'CREATE VIEW', 'ALTER VIEW', 'DROP VIEW', 'CREATE FUNCTION', 'ALTER FUNCTION', 'DROP FUNCTION', 'CREATE PROCEDURE', 'ALTER PROCEDURE', 'DROP PROCEDURE', 'CREATE EVENT', 'ALTER EVENT', 'DROP EVENT'.
