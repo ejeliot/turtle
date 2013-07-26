@@ -130,7 +130,7 @@ class Migrate {
         $this->migrationsMax = 0;
         $dir = dir($this->config['migrations']['dir']);
         while (($filename = $dir->read()) !== false) {
-            if (preg_match('/^([0-9]+)[\._-][a-z0-9_-]+\.sql$/i', $filename, $matches)) {
+            if (preg_match('/^(\d+)\.[a-z][a-z0-9._-]*[a-z0-9]\.sql$/', $filename, $matches)) {
                 $this->migrations[$filename] = $this->db_migration_applied($filename);
                 if ($matches[1] > $this->migrationsMax) {
                     $this->migrationsMax = $matches[1];

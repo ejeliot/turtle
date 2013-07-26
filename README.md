@@ -122,6 +122,17 @@ Dumps all schema altering queries applied since the given date/time.
 
 ## Change Log
 
+### 0.0.10 (26th July 2013)
+
+Updated to standardise support migration filename format to:
+
+1. number
+2. dot
+3. letter
+4. letter, number, "-", "_", "."
+5. letter, number
+6. ".sql"
+
 ### 0.0.9 (27th June 2013)
 
 Errors weren't shown when a migration failed because $this->db->error is empty after rollback. Moved messaging so it now works.
