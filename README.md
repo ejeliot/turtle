@@ -122,6 +122,10 @@ Dumps all schema altering queries applied since the given date/time.
 
 ## Change Log
 
+### 0.0.13 (12th July 2013)
+
+Fixed incorrect migration
+
 ### 0.0.12 (2th July 2013)
 
 Increased size of script column to accommodate long migrations
