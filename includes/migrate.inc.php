@@ -168,7 +168,7 @@ class Migrate {
         $query = sprintf(
             'CREATE TABLE IF NOT EXISTS `%s` (' . PHP_EOL .
             '  `filename` VARCHAR(250) NOT NULL,' . PHP_EOL .
-            '  `script` TEXT,' . PHP_EOL .
+            '  `script` LONGTEXT,' . PHP_EOL .
             '  `date_applied` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,' . PHP_EOL .
             '  PRIMARY KEY(`filename`)' . PHP_EOL .
             ') ENGINE=%s DEFAULT CHARSET=%s',

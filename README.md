@@ -122,9 +122,13 @@ Dumps all schema altering queries applied since the given date/time.
 
 ## Change Log
 
+### 0.0.12 (2th July 2013)
+
+Increased size of script column to accommodate long migrations
+
 ### 0.0.11 (26th July 2013)
 
-Make filename check case insensitive
+Made filename check case insensitive
 
 ### 0.0.10 (26th July 2013)
 
