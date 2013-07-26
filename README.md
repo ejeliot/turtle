@@ -122,6 +122,10 @@ Dumps all schema altering queries applied since the given date/time.
 
 ## Change Log
 
+### 0.0.11 (26th July 2013)
+
+Make filename check case insensitive
+
 ### 0.0.10 (26th July 2013)
 
 Updated to standardise support migration filename format to:
